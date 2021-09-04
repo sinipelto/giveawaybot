@@ -1,0 +1,4 @@
+# Lines starting with '#' wont be read as recipients
+Example User <example.user@mail.com>
+Someone Other <other@gmail.com>
+#Disabled User <disabled@gmail.com>
