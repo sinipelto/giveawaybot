@@ -110,17 +110,17 @@ def get_mail_recipients() -> list:
     return recipients
 
 
-def build_email_message(data, recipients) -> str:
-    if type(recipients) is not list or len(recipients) <= 0:
-        print("ERROR: Could not parse email recipients. Ensure recipients file is configured correctly.")
-    
+def build_email_message(data, recipient) -> str:
+    if recipient is None or recipient == "":
+        print("ERROR: Specified recipient was empty.")
+
     message = ""
     
     sender = f"{config.sender_name} <{config.sender_email}>"
     subject = f"{config.email_title}"
 
     message += f"From: {sender}\r\n"
-    message += f"To: " + ", ".join(recipients) + "\r\n"
+    message += f"To: {recipient}\r\n"
     message += "MIME-Version: 1.0\r\n"
     message += "Content-Transfer-Encoding: 8bit\r\n"
     message += "Content-Type: text/html; charset=\"UTF-8\"\r\n"
@@ -132,7 +132,7 @@ def build_email_message(data, recipients) -> str:
     message += f"Current Configuration: Minimum Value: ${config.min_value}. Maximum Value: {config.max_value}.<br><br>\r\n"
 
     for entry in data:
-        message += f"<img src='{entry['image']}' width='250' height='250'>"
+        message += f"<img src='{entry['image']}' width='300' height='250'>"
         message += "<pre>    </pre>"
         message += f"<h1><a href='{entry['open_giveaway']}'>{entry['title']} (Value: {entry['worth']})</a></h1>"
         message += f"<p>Description: {entry['description']}</p>"
@@ -174,11 +174,12 @@ def main():
         print("No email recipients could be read. Exiting..")
         return
 
-    print("Building email for new giveaways")
-    message = build_email_message(filtered, recs)
-
-    print("Sending mail to recipients..")
-    send_email(recs, message)
+    print("Building and sending emails for recipients..")
+    for rec in recs:
+        message = build_email_message(filtered, rec)
+        send_email([rec], message)
+        
+    print("Sending emails done.")
 
     print("Inserting notified giveaways to db..")
     insert_giveaways(filtered)
